@@ -1,7 +1,9 @@
 import React from 'react'
+
 import NewTaskForm from '../NewTaskForm'
 import TaskList from '../TaskList'
 import Footer from '../Footer'
+
 import './App.css'
 
 export default class App extends React.Component {
