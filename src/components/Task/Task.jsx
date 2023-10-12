@@ -47,10 +47,21 @@ class Task extends React.Component {
     }
   }
 
-  render() {
-    const { onDeleted, onToggleCompleted, completed, date } = this.props
+  handleDelete = (e) => {
+    this.props.onDeleted(e)
+  }
 
+  render() {
+    const { onToggleCompleted, completed, date, showTimer, time, onDeleted, timerOn, timerOff } = this.props
     const { editing, value } = this.state
+
+    let convertedTime
+    if (time) {
+      let min = Math.floor(time / 60)
+      let sec = time - min * 60
+      sec.toString().length == 1 ? (sec = `0${sec}`) : null
+      convertedTime = `${min}:${sec}`
+    }
 
     let className = null
     let element = null
@@ -74,10 +85,19 @@ class Task extends React.Component {
       <li className={className} onClick={onToggleCompleted}>
         <div className="view">
           <input className="toggle" type="checkbox" checked={completed} readOnly />
-          <label>
-            <span className="description">{value}</span>
-            <span className="created">{created}</span>
-          </label>
+          <div>
+            <span className="title">{value}</span>
+            <span className="description">
+              {showTimer ? (
+                <>
+                  <button className="icon icon-play" onClick={timerOn}></button>
+                  <button className="icon icon-pause" onClick={timerOff}></button>
+                </>
+              ) : null}
+              {convertedTime}
+            </span>
+            <span className="description">{created}</span>
+          </div>
           <button type="button" className="icon icon-edit" onClick={this.handleEditingClick} />
           <button type="button" className="icon icon-destroy" onClick={onDeleted} />
         </div>

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Task from '../Task'
 import './TaskList.css'
 
-const TaskList = ({ tasks, onDeleted, onToggleCompleted, saveValue }) => {
+const TaskList = ({ tasks, onDeleted, onToggleCompleted, saveValue, timerOn, timerOff }) => {
   const elements = tasks.map(({ id, ...props }) => (
     <Task
       key={id}
@@ -12,6 +12,8 @@ const TaskList = ({ tasks, onDeleted, onToggleCompleted, saveValue }) => {
       onDeleted={(e) => onDeleted(id, e)}
       onToggleCompleted={(e) => onToggleCompleted(e, id)}
       saveValue={(value) => saveValue(id, value)}
+      timerOn={(e) => timerOn(id, e)}
+      timerOff={(e) => timerOff(id, e)}
     />
   ))
 

@@ -4,42 +4,79 @@ import PropTypes from 'prop-types'
 
 class NewTaskForm extends React.Component {
   state = {
-    value: '',
+    titleValue: '',
+    minValue: '',
+    secValue: '',
+    invalid: false,
+    showTimer: true,
   }
 
   static propTypes = {
     onAdded: PropTypes.func.isRequired,
   }
 
-  handleChange = (e) => {
+  handleTitleChange = (e) => {
     const newValue = e.target.value
     this.setState({
-      value: newValue,
+      titleValue: newValue,
+    })
+  }
+
+  handleMinChange = (e) => {
+    const newValue = e.target.value
+    this.setState({
+      minValue: newValue,
+    })
+  }
+
+  handleSecChange = (e) => {
+    const newValue = e.target.value
+    this.setState({
+      secValue: newValue,
     })
   }
 
   handleReturn = (e) => {
+    e.preventDefault()
     const { onAdded } = this.props
-    const { value } = this.state
+    const { titleValue, minValue, secValue } = this.state
+    const min = Number(minValue.trim())
+    const sec = Number(secValue.trim())
 
-    if (e.keyCode === 13 && value !== '') {
-      onAdded(value, e)
+    if (isNaN(min) || isNaN(sec) || min > 59 || sec > 59) {
       this.setState({
-        value: '',
+        invalid: true,
       })
+      return
     }
+
+    let time = min * 60 + sec
+
+    let showTimer = true
+    if (time == 0) {
+      time = null
+      showTimer = false
+    }
+
+    onAdded(titleValue, time, showTimer)
+    this.setState({
+      titleValue: '',
+      minValue: '',
+      secValue: '',
+      invalid: false,
+    })
   }
 
   render() {
-    const { value } = this.state
+    const { titleValue, minValue, secValue, invalid } = this.state
+
     return (
-      <input
-        className="new-todo"
-        placeholder="What needs to be done?"
-        onChange={this.handleChange}
-        onKeyDown={this.handleReturn}
-        value={value}
-      />
+      <form className={invalid ? 'new-todo-form invalid' : 'new-todo-form'} onSubmit={this.handleReturn}>
+        <input className="new-todo" placeholder="Task" value={titleValue} onChange={this.handleTitleChange} />
+        <input className="new-todo-form__timer" placeholder="Min" value={minValue} onChange={this.handleMinChange} />
+        <input className="new-todo-form__timer" placeholder="Sec" value={secValue} onChange={this.handleSecChange} />
+        <input type="submit" style={{ display: 'none' }} />
+      </form>
     )
   }
 }

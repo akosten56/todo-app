@@ -9,20 +9,46 @@ import './App.css'
 export default class App extends React.Component {
   state = {
     tasksData: [],
-
     filterBy: 'all',
-
     active: 0,
+    invalid: false,
   }
 
   id = 10
 
-  deleteTask = (id, e) => {
-    e.stopPropagation()
+  timerId = {}
 
+  addTask = (value, time, showTimer = true) => {
+    const dateOfCreation = new Date()
+    this.setState(({ tasksData, active }) => {
+      const newTask = {
+        id: this.id++,
+        label: value,
+        completed: false,
+        date: dateOfCreation,
+        time: time,
+        isTimerOff: true,
+        showTimer: showTimer,
+      }
+
+      if (time) this.timerOn(newTask.id)
+
+      const newTaskData = [...tasksData, newTask]
+
+      return {
+        tasksData: newTaskData,
+        active: active + 1,
+      }
+    })
+  }
+
+  deleteTask = (id, e) => {
+    e ? e.stopPropagation() : null
+    this.timerOff(id)
     this.setState(({ tasksData }) => {
       const i = tasksData.findIndex((el) => el.id === id)
       const newTaskData = [...tasksData]
+
       newTaskData.splice(i, 1)
 
       return {
@@ -31,21 +57,36 @@ export default class App extends React.Component {
     })
   }
 
-  addTask = (value) => {
-    const dateOfCreation = new Date()
-    this.setState(({ tasksData, active }) => {
-      const newTask = {
-        id: this.id++,
-        label: value,
-        completed: false,
-        date: dateOfCreation,
-      }
+  timerOn = (id, e) => {
+    e ? e.stopPropagation() : null
+    const isTimerOff = this.state.tasksData.find((el) => el.id === id)
+      ? this.state.tasksData.find((el) => el.id === id).isTimerOff
+      : true
+    if (isTimerOff) {
+      this.timerId[id] = setInterval(() => {
+        this.setState(({ tasksData }) => {
+          const newTaskData = [...tasksData]
+          const task = newTaskData.find((el) => el.id === id)
+          task.time = task.time - 1
+          console.log(task.time)
+          task.isTimerOff = false
+          return {
+            tasksData: newTaskData,
+          }
+        })
+      }, 1000)
+    }
+  }
 
-      const newTaskData = [...tasksData, newTask]
-
+  timerOff = (id, e) => {
+    e ? e.stopPropagation() : null
+    clearInterval(this.timerId[id])
+    this.setState(({ tasksData }) => {
+      const newTaskData = [...tasksData]
+      const task = newTaskData.find((el) => el.id === id)
+      task.isTimerOff = true
       return {
         tasksData: newTaskData,
-        active: active + 1,
       }
     })
   }
@@ -98,13 +139,7 @@ export default class App extends React.Component {
   }
 
   clearCompleted = () => {
-    this.setState(({ tasksData }) => {
-      const newTaskData = tasksData.filter((el) => el.completed === false)
-
-      return {
-        tasksData: newTaskData,
-      }
-    })
+    this.state.tasksData.filter((el) => el.completed === true).forEach((task) => this.deleteTask(task.id))
   }
 
   saveValue = (id, value) => {
@@ -120,7 +155,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { filterBy, tasksData } = this.state
+    const { filterBy, tasksData, invalid } = this.state
 
     const active = tasksData.filter((el) => !el.completed).length
 
@@ -140,7 +175,7 @@ export default class App extends React.Component {
       <section className="todoapp">
         <header className="header">
           <h1>Todos</h1>
-          <NewTaskForm onAdded={this.addTask} />
+          <NewTaskForm onAdded={this.addTask} invalid={invalid} />
         </header>
         <section className="main">
           <TaskList
@@ -148,6 +183,8 @@ export default class App extends React.Component {
             onDeleted={this.deleteTask}
             onToggleCompleted={this.onToggleCompleted}
             saveValue={this.saveValue}
+            timerOn={this.timerOn}
+            timerOff={this.timerOff}
           />
           <Footer
             active={active}
