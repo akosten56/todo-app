@@ -1,52 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './NewTaskForm.css'
 import PropTypes from 'prop-types'
 
-class NewTaskForm extends React.Component {
-  state = {
-    titleValue: '',
-    minValue: '',
-    secValue: '',
-    invalid: false,
-    showTimer: true,
-  }
+const NewTaskForm = ({ onAdded }) => {
+  const [titleValue, setTitleValue] = useState('')
+  const [minValue, setMinValue] = useState('')
+  const [secValue, setSecValue] = useState('')
+  const [invalid, setInvalid] = useState(false)
 
-  static propTypes = {
-    onAdded: PropTypes.func.isRequired,
-  }
-
-  handleTitleChange = (e) => {
-    const newValue = e.target.value
-    this.setState({
-      titleValue: newValue,
-    })
-  }
-
-  handleMinChange = (e) => {
-    const newValue = e.target.value
-    this.setState({
-      minValue: newValue,
-    })
-  }
-
-  handleSecChange = (e) => {
-    const newValue = e.target.value
-    this.setState({
-      secValue: newValue,
-    })
-  }
-
-  handleReturn = (e) => {
+  const handleReturn = (e) => {
     e.preventDefault()
-    const { onAdded } = this.props
-    const { titleValue, minValue, secValue } = this.state
     const min = Number(minValue.trim())
     const sec = Number(secValue.trim())
 
     if (isNaN(min) || isNaN(sec) || min > 59 || sec > 59) {
-      this.setState({
-        invalid: true,
-      })
+      setInvalid(true)
       return
     }
 
@@ -59,26 +27,39 @@ class NewTaskForm extends React.Component {
     }
 
     onAdded(titleValue, time, showTimer)
-    this.setState({
-      titleValue: '',
-      minValue: '',
-      secValue: '',
-      invalid: false,
-    })
+    setTitleValue('')
+    setMinValue('')
+    setSecValue('')
+    setInvalid(false)
   }
 
-  render() {
-    const { titleValue, minValue, secValue, invalid } = this.state
+  return (
+    <form className={invalid ? 'new-todo-form invalid' : 'new-todo-form'} onSubmit={handleReturn}>
+      <input
+        className="new-todo"
+        placeholder="Task"
+        value={titleValue}
+        onChange={(e) => setTitleValue(e.target.value)}
+      />
+      <input
+        className="new-todo-form__timer"
+        placeholder="Min"
+        value={minValue}
+        onChange={(e) => setMinValue(e.target.value)}
+      />
+      <input
+        className="new-todo-form__timer"
+        placeholder="Sec"
+        value={secValue}
+        onChange={(e) => setSecValue(e.target.value)}
+      />
+      <input type="submit" style={{ display: 'none' }} />
+    </form>
+  )
+}
 
-    return (
-      <form className={invalid ? 'new-todo-form invalid' : 'new-todo-form'} onSubmit={this.handleReturn}>
-        <input className="new-todo" placeholder="Task" value={titleValue} onChange={this.handleTitleChange} />
-        <input className="new-todo-form__timer" placeholder="Min" value={minValue} onChange={this.handleMinChange} />
-        <input className="new-todo-form__timer" placeholder="Sec" value={secValue} onChange={this.handleSecChange} />
-        <input type="submit" style={{ display: 'none' }} />
-      </form>
-    )
-  }
+NewTaskForm.propTypes = {
+  onAdded: PropTypes.func.isRequired,
 }
 
 export default NewTaskForm
