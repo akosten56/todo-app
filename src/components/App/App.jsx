@@ -33,7 +33,7 @@ const App = () => {
   }
 
   const deleteTask = (id, e) => {
-    e ? e.stopPropagation() : null
+    if (e) e.stopPropagation()
 
     timerOff(id)
 
@@ -46,7 +46,7 @@ const App = () => {
   }
 
   const timerOn = (id, e) => {
-    e ? e.stopPropagation() : null
+    if (e) e.stopPropagation()
 
     const task = tasksData.find((el) => el.id === id)
     const isTimerOn = task ? task.isTimerOn : false
@@ -74,7 +74,7 @@ const App = () => {
   }
 
   const timerOff = (id, e) => {
-    e ? e.stopPropagation() : null
+    if (e) e.stopPropagation()
 
     clearInterval(timers[id])
 
@@ -92,7 +92,7 @@ const App = () => {
     })
   }
 
-  const onToggleCompleted = (e, id) => {
+  const toggleCompleted = (id, e) => {
     if (e.target.className === 'edit' || e.target.className === 'icon icon-edit') return
 
     setTasksData((tasksData) => {
@@ -103,36 +103,15 @@ const App = () => {
     })
   }
 
-  const chooseAll = (e) => {
-    e.target.className = 'selected'
-    e.target.parentNode.nextSibling.firstChild.className = ''
-    e.target.parentNode.nextSibling.nextSibling.firstChild.className = ''
-    setFilter('all')
-  }
-
-  const chooseActive = (e) => {
-    e.target.className = 'selected'
-    e.target.parentNode.previousSibling.firstChild.className = ''
-    e.target.parentNode.nextSibling.firstChild.className = ''
-    setFilter('active')
-  }
-
-  const chooseCompleted = (e) => {
-    e.target.className = 'selected'
-    e.target.parentNode.previousSibling.firstChild.className = ''
-    e.target.parentNode.previousSibling.previousSibling.firstChild.className = ''
-    setFilter('completed')
-  }
-
   const clearCompleted = () => {
     tasksData.filter((el) => el.completed).forEach((task) => deleteTask(task.id))
   }
 
-  const saveValue = (id, value) => {
+  const handleInputChange = (id, e) => {
     setTasksData((tasksData) => {
       const newTaskData = [...tasksData]
       const task = newTaskData.find((el) => el.id === id)
-      task.label = value
+      task.label = e.target.value
       return newTaskData
     })
   }
@@ -155,24 +134,18 @@ const App = () => {
     <section className="todoapp">
       <header className="header">
         <h1>Todos</h1>
-        <NewTaskForm onAdded={addTask} />
+        <NewTaskForm addTask={addTask} />
       </header>
       <section className="main">
         <TaskList
           tasks={tasks}
-          onDeleted={deleteTask}
-          onToggleCompleted={onToggleCompleted}
-          saveValue={saveValue}
+          deleteTask={deleteTask}
+          toggleCompleted={toggleCompleted}
+          handleInputChange={handleInputChange}
           timerOn={timerOn}
           timerOff={timerOff}
         />
-        <Footer
-          active={active}
-          chooseAll={chooseAll}
-          chooseActive={chooseActive}
-          chooseCompleted={chooseCompleted}
-          clearCompleted={clearCompleted}
-        />
+        <Footer active={active} handleFilterChange={(filter) => setFilter(filter)} clearCompleted={clearCompleted} />
       </section>
     </section>
   )
