@@ -1,36 +1,42 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './NewTaskForm.css'
-import PropTypes from 'prop-types'
 
-const NewTaskForm = ({ onAdded }) => {
+const NewTaskForm = ({ addTask }) => {
   const [titleValue, setTitleValue] = useState('')
   const [minValue, setMinValue] = useState('')
   const [secValue, setSecValue] = useState('')
   const [invalid, setInvalid] = useState(false)
+  const [isReturn, setIsReturn] = useState(false)
+
+  useEffect(() => {
+    if (isReturn) {
+      const min = Number(minValue.trim())
+      const sec = Number(secValue.trim())
+
+      if (isNaN(min) || isNaN(sec) || min > 59 || sec > 59) {
+        setInvalid(true)
+      } else {
+        let time = min * 60 + sec
+
+        let showTimer = true
+        if (time == 0) {
+          time = null
+          showTimer = false
+        }
+
+        addTask(titleValue, time, showTimer)
+        setTitleValue('')
+        setMinValue('')
+        setSecValue('')
+        setInvalid(false)
+      }
+      setIsReturn(false)
+    }
+  }, [isReturn])
 
   const handleReturn = (e) => {
     e.preventDefault()
-    const min = Number(minValue.trim())
-    const sec = Number(secValue.trim())
-
-    if (isNaN(min) || isNaN(sec) || min > 59 || sec > 59) {
-      setInvalid(true)
-      return
-    }
-
-    let time = min * 60 + sec
-
-    let showTimer = true
-    if (time == 0) {
-      time = null
-      showTimer = false
-    }
-
-    onAdded(titleValue, time, showTimer)
-    setTitleValue('')
-    setMinValue('')
-    setSecValue('')
-    setInvalid(false)
+    setIsReturn(true)
   }
 
   return (
@@ -56,10 +62,6 @@ const NewTaskForm = ({ onAdded }) => {
       <input type="submit" style={{ display: 'none' }} />
     </form>
   )
-}
-
-NewTaskForm.propTypes = {
-  onAdded: PropTypes.func.isRequired,
 }
 
 export default NewTaskForm

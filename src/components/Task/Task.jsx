@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
 import './Task.css'
+import classNames from 'classnames'
 
 const Task = ({
   label,
@@ -9,90 +9,59 @@ const Task = ({
   date,
   showTimer,
   time,
-  saveValue,
-  onToggleCompleted,
-  onDeleted,
+  handleInputChange,
+  toggleCompleted,
+  deleteTask,
   timerOn,
   timerOff,
 }) => {
   const [edit, setEdit] = useState(false)
-  const [value, setValue] = useState(label)
 
-  const handleReturn = (e) => {
-    if (e.keyCode === 27 || e.keyCode === 13) {
-      setEdit(false)
-      saveValue(e.target.value)
-    }
+  const getPadTime = (time) => {
+    return time.toString().padStart(2, '0')
   }
 
-  let className = null
-  let element = null
-  if (completed) {
-    className = 'completed'
-  } else if (edit) {
-    className = 'editing'
-    element = (
-      <input
-        type="text"
-        className="edit"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleReturn}
-      />
-    )
-  }
-
-  let convertedTime
-  if (time) {
-    let min = Math.floor(time / 60)
-    let sec = time - min * 60
-    sec.toString().length == 1 ? (sec = `0${sec}`) : null
-    convertedTime = `${min}:${sec}`
-  }
-
-  const created = formatDistanceToNow(date, {
-    addSuffix: true,
-    includeSeconds: true,
+  const taskClass = classNames({
+    completed: edit ? false : completed,
+    editing: edit,
   })
 
+  const min = getPadTime(Math.floor(time / 60))
+  const sec = getPadTime(time - min * 60)
+
+  const created = formatDistanceToNow(date, { addSuffix: true, includeSeconds: true })
+
   return (
-    <li className={className} onClick={onToggleCompleted}>
+    <li className={taskClass} onClick={toggleCompleted}>
       <div className="view">
         <input className="toggle" type="checkbox" checked={completed} readOnly />
         <div>
-          <span className="title">{value}</span>
+          <span className="title">{label}</span>
           <span className="description">
             {showTimer ? (
               <>
                 <button className="icon icon-play" onClick={timerOn}></button>
                 <button className="icon icon-pause" onClick={timerOff}></button>
+                {`${min}:${sec}`}
               </>
             ) : null}
-            {convertedTime}
           </span>
           <span className="description">{created}</span>
         </div>
         <button type="button" className="icon icon-edit" onClick={() => setEdit(true)} />
-        <button type="button" className="icon icon-destroy" onClick={onDeleted} />
+        <button type="button" className="icon icon-destroy" onClick={deleteTask} />
       </div>
-      {element}
+      {edit ? (
+        <input
+          type="text"
+          className="edit"
+          value={label}
+          onChange={handleInputChange}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === 'Escape' ? setEdit(false) : null)}
+        />
+      ) : null}
     </li>
   )
-}
-
-Task.defaultProps = {
-  label: 'new todo',
-  completed: false,
-  date: new Date(),
-}
-
-Task.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  date: PropTypes.instanceOf(Date),
-  completed: PropTypes.bool,
-  saveValue: PropTypes.func.isRequired,
-  onDeleted: PropTypes.func.isRequired,
-  onToggleCompleted: PropTypes.func.isRequired,
 }
 
 export default Task
