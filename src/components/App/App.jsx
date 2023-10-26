@@ -4,12 +4,13 @@ import NewTaskForm from '../NewTaskForm'
 import TaskList from '../TaskList'
 import Footer from '../Footer'
 
+import timers from './source/timers'
+
 import './App.css'
 
 const App = () => {
   const [id, setId] = useState(10)
   const [tasksData, setTasksData] = useState([])
-  const [timers, setTimers] = useState({})
   const [filter, setFilter] = useState('all')
 
   const addTask = (value, time, showTimer = true) => {
@@ -52,37 +53,27 @@ const App = () => {
     const isTimerOn = task ? task.isTimerOn : false
     if (isTimerOn) return
 
-    setTimers((timers) => {
-      const newTimers = { ...timers }
-
-      newTimers[id] = setInterval(() => {
-        setTasksData((tasksData) => {
-          const newTaskData = [...tasksData]
-          const task = newTaskData.find((el) => el.id === id)
-          task.time = task.time - 1
-          if (task.time === 0) {
-            clearInterval(newTimers[id])
-            task.showTimer = false
-          }
-          task.isTimerOn = true
-          return newTaskData
-        })
-      }, 1000)
-
-      return newTimers
-    })
+    timers[id] = setInterval(() => {
+      setTasksData((tasksData) => {
+        const newTaskData = [...tasksData]
+        const task = newTaskData.find((el) => el.id === id)
+        task.time = task.time - 1
+        console.log(task.time)
+        if (task.time === 0) {
+          clearInterval(timers[id])
+          task.showTimer = false
+        }
+        task.isTimerOn = true
+        return newTaskData
+      })
+    }, 1000)
   }
 
   const timerOff = (id, e) => {
     if (e) e.stopPropagation()
 
     clearInterval(timers[id])
-
-    setTimers((timers) => {
-      const newTimers = { ...timers }
-      delete newTimers[id]
-      return newTimers
-    })
+    delete timers[id]
 
     setTasksData((tasksData) => {
       const newTaskData = [...tasksData]
