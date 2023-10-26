@@ -58,7 +58,6 @@ const App = () => {
         const newTaskData = [...tasksData]
         const task = newTaskData.find((el) => el.id === id)
         task.time = task.time - 1
-        console.log(task.time)
         if (task.time === 0) {
           clearInterval(timers[id])
           task.showTimer = false
