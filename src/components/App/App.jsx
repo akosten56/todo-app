@@ -29,18 +29,27 @@ const App = () => {
       return newTaskData
     })
 
-    if (showTimer) timerOn(id)
+    //if (showTimer) timerOn(id)
   }
 
   const deleteTask = (id, e) => {
     if (e) e.stopPropagation()
 
-    timerOff(id)
+    //timerOff(id)
 
     setTasksData((tasksData) => {
       const i = tasksData.findIndex((el) => el.id === id)
       const newTaskData = [...tasksData]
       newTaskData.splice(i, 1)
+      return newTaskData
+    })
+  }
+
+  const saveTime = (id, time) => {
+    setTasksData((tasksData) => {
+      const newTaskData = [...tasksData]
+      const task = newTaskData.find((el) => el.id === id)
+      task.time = time
       return newTaskData
     })
   }
@@ -144,6 +153,7 @@ const App = () => {
           handleInputChange={handleInputChange}
           timerOn={timerOn}
           timerOff={timerOff}
+          saveTime={saveTime}
         />
         <Footer active={active} handleFilterChange={(filter) => setFilter(filter)} clearCompleted={clearCompleted} />
       </section>
